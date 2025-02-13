@@ -14,20 +14,33 @@ pub fn has_short_flag(args: Vec<String>, c: char) -> bool {
 
 pub fn ensure_args_recognised(args: Vec<String>) {
     let valid_args = [
-        "-h", "--head",
-        "-t", "--tail",
+        "-h",
+        "--head",
+        "-t",
+        "--tail",
         "--no-header",
         "--no-footer",
-        "-r", "--raw",
-        "-i","--interval",
-        "-d", "--diff",
-        "-o", "--output",
+        "-r",
+        "--raw",
+        "-i",
+        "--interval",
+        "-d",
+        "--diff",
+        "-o",
+        "--output",
         "--output-mode",
-        "-q", "--quiet",
-        "-h", "--help"
+        "-q",
+        "--quiet",
+        "-h",
+        "--help",
+        "-g",
+        "--grep",
     ];
 
-    for arg in args.into_iter().filter(|s| s.chars().nth(0).unwrap() == '-') {
+    for arg in args
+        .into_iter()
+        .filter(|s| s.chars().nth(0).unwrap() == '-')
+    {
         if !valid_args.contains(&arg.as_str()) {
             panic!("Unrecognised argument: {}", arg);
         }
@@ -39,14 +52,22 @@ pub fn ensure_none_conflicting(args: Vec<String>) {
         ["--head", "-h"],
         ["--tail", "-t"],
         ["--interval", "-i"],
-        ["--output", "-o"]
+        ["--output", "-o"],
     ];
 
-        for exclusive in exclusives {
-            if exclusive.iter().filter(|&item| args.contains(&item.to_string())).count() >= 2 {
-                panic!("Argument conflict: Only 1 of {} can be used", exclusive.join(", "));
-            }
+    for exclusive in exclusives {
+        if exclusive
+            .iter()
+            .filter(|&item| args.contains(&item.to_string()))
+            .count()
+            >= 2
+        {
+            panic!(
+                "Argument conflict: Only 1 of {} can be used",
+                exclusive.join(", ")
+            );
         }
+    }
 }
 
 pub fn validate_value_types(args: Vec<String>) {
@@ -63,13 +84,19 @@ fn ensure_i32_values(args: Vec<String>) {
         }
 
         match args.iter().position(|s| *s == *arg) {
-            Some(i) => {
-                match args[i+1].parse::<i32>() {
-                    Ok(_) => { }
-                    Err(_) => { panic!("Invalid value \"{}\" for {} - could not convert to 32-bit int", args[i+1], args[i]); }
+            Some(i) => match args[i + 1].parse::<i32>() {
+                Ok(_) => {}
+                Err(_) => {
+                    panic!(
+                        "Invalid value \"{}\" for {} - could not convert to 32-bit int",
+                        args[i + 1],
+                        args[i]
+                    );
                 }
+            },
+            None => {
+                panic!("List item disappeared randomly??");
             }
-            None => { panic!("List item disappeared randomly??"); }
         }
     }
 }
@@ -84,12 +111,16 @@ fn ensure_u64_values(args: Vec<String>) {
 
         match args.iter().position(|s| *s == *arg) {
             Some(i) => {
-                match args[i+1].parse::<u64>() {
-                    Ok(_) => { }
-                    Err(_) => { panic!("Invalid value \"{}\" for {} - could not convert to unsigned 64-bit int", args[i+1], args[i]); }
+                match args[i + 1].parse::<u64>() {
+                    Ok(_) => {}
+                    Err(_) => {
+                        panic!("Invalid value \"{}\" for {} - could not convert to unsigned 64-bit int", args[i+1], args[i]);
+                    }
                 }
             }
-            None => { panic!("List item disappeared randomly??"); }
+            None => {
+                panic!("List item disappeared randomly??");
+            }
         }
     }
 }
