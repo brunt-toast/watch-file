@@ -35,6 +35,8 @@ pub fn ensure_args_recognised(args: Vec<String>) {
         "--help",
         "-g",
         "--grep",
+        "-c",
+        "--clear",
     ];
 
     for arg in args

@@ -36,6 +36,9 @@ fn main() {
     let grep = grep::has_grep_flag(args.clone());
     let grep_filter = grep::get_grep_regex(args.clone());
 
+    let clear = args.contains(&String::from("--clear"))
+        || args_assertions::has_short_flag(args.clone(), 'c');
+
     let raw =
         args.contains(&String::from("--raw")) || args_assertions::has_short_flag(args.clone(), 'r');
     let no_header = args.contains(&String::from("--no-header")) || raw;
@@ -107,6 +110,10 @@ fn main() {
                     }
 
                     if !quiet {
+                        if clear {
+                            print!("{}[2J", 27 as char);
+                        }
+
                         if !no_header {
                             println!(
                                 "=== START {:?} at {} ===",
