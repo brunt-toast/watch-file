@@ -1,0 +1,9 @@
+<Project>
+  <PropertyGroup>
+    <CsprojName>$([System.IO.Path]::GetFileNameWithoutExtension($(MSBuildProjectFile)))</CsprojName>
+    <RootNamespace>Dev.JoshBrunton.$(CsprojName)</RootNamespace>
+    <Version>0.1.0</Version>
+
+    <WarningsAsErrors>CA2017</WarningsAsErrors>
+  </PropertyGroup>
+</Project>
