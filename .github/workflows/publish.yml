@@ -1,0 +1,73 @@
+name: Publish .NET 9 CLI
+
+on:
+  push:
+    tags: [ ci/*, version/* ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and publish for ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            rid: linux-x64
+          - os: ubuntu-latest
+            rid: linux-x86
+          - os: windows-latest
+            rid: win-x64
+          - os: windows-latest
+            rid: win-x86
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 9.0
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore src/WatchFile.Cli/WatchFile.Cli.csproj
+
+      - name: Get project version
+        id: get_version
+        shell: bash
+        run: |
+          VERSION=$(dotnet msbuild src/WatchFile.Cli/WatchFile.Cli.csproj -nologo -t:GetTargetFramework -property:TargetFramework=net9.0 -getproperty:Version)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Publish ${{ matrix.rid }}
+        run: |
+          dotnet publish src/WatchFile.Cli/WatchFile.Cli.csproj \
+            -c Release \
+            -r ${{ matrix.rid }} \
+            --self-contained true \
+            /p:PublishSingleFile=true \
+            /p:PublishTrimmed=false \
+            /p:IncludeNativeLibrariesForSelfExtract=true \
+            -o "publish/${{ matrix.rid }}"
+
+      - name: Rename executable with version
+        shell: bash
+        run: |
+          VERSION=${{ steps.get_version.outputs.version }}
+          cd publish/${{ matrix.rid }}
+          # Find the published file (cross-platform)
+          FILE=$(find . -maxdepth 1 -type f \( -name "WatchFile.Cli*" -o -name "WatchFile.Cli.exe" \) | head -n 1)
+          EXT="${FILE##*.}"
+          BASENAME="WatchFile.Cli-$VERSION-${{ matrix.rid }}"
+          if [[ "$EXT" == "exe" ]]; then
+            mv "$FILE" "$BASENAME.exe"
+          else
+            mv "$FILE" "$BASENAME"
+          fi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: WatchFile.Cli-${{ steps.get_version.outputs.version }}-${{ matrix.rid }}
+          path: publish/${{ matrix.rid }}/*
