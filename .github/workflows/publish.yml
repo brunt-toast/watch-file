@@ -44,7 +44,7 @@ jobs:
       - name: Publish ${{ matrix.rid }}
         shell: bash
         run: |
-          dotnet publish src/WatchFile.Cli/WatchFile.Cli.csproj \
+          dotnet publish "src/WatchFile.Cli/WatchFile.Cli.csproj" \
             -c Release \
             -r ${{ matrix.rid }} \
             --self-contained true \
