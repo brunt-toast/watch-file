@@ -52,23 +52,7 @@ jobs:
           -p:PublishTrimmed=false
           -p:IncludeNativeLibrariesForSelfExtract=true
           -o "publish/${{ matrix.rid }}"
-
-
-      - name: Rename executable with version
-        shell: bash
-        run: |
-          VERSION=${{ steps.get_version.outputs.version }}
-          cd publish/${{ matrix.rid }}
-          # Find the published file (cross-platform)
-          FILE=$(find . -maxdepth 1 -type f \( -name "WatchFile.Cli*" -o -name "WatchFile.Cli.exe" \) | head -n 1)
-          EXT="${FILE##*.}"
-          BASENAME="WatchFile.Cli-$VERSION-${{ matrix.rid }}"
-          if [[ "$EXT" == "exe" ]]; then
-            mv "$FILE" "$BASENAME.exe"
-          else
-            mv "$FILE" "$BASENAME"
-          fi
-
+          
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
