@@ -17,6 +17,17 @@ This tool acknowledges that change and growth are different.  Unlike `tail -f` a
 
 This tool isn't currently available on any package managers. 
 
+If you're running a compatible operating system (Windows x64 or x86, Linux x64), you can download any of the pre-compiled [releases](https://github.com/brunt-toast/watch-file/releases). Download the file relevant to your OS and architecture, rename it to whatever you like (usually `watch-file[.exe]`), and drop it in a directory with the following guide: 
+
+| OS | Arch | Users | Path |
+|---|---|---|---|
+| Windows | x86 | Single | `%USERPROFILE%\AppData\Local\Programs\` |
+| Windows | x86 | Multi  | `C:\Program Files (x86)\` |
+| Windows | x64 | Single | `%USERPROFILE%\AppData\Local\Programs\` |
+| Windows | x64 | Multi  | `C:\Program Files\` |
+| Linux   | x64 | Single | `~/.local/bin` |
+| Linux   | x64 | Multi  | `/usr/local/bin` |
+
 ## Compile From Source
 
 As a pre-requisite, you'll need the .NET 9 SDK. The shortest robust way to compile and install the tool is: 
