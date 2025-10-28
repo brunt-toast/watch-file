@@ -14,12 +14,13 @@ jobs:
         include:
           - os: ubuntu-latest
             rid: linux-x64
-          - os: ubuntu-latest
-            rid: linux-x86
+            arch: x64
           - os: windows-latest
             rid: win-x64
+            arch: x64
           - os: windows-latest
             rid: win-x86
+            arch: x86
 
     steps:
       - name: Checkout code
