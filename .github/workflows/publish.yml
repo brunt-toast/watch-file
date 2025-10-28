@@ -37,7 +37,7 @@ jobs:
         id: get_version
         shell: bash
         run: |
-          VERSION=$(dotnet msbuild src/WatchFile.Cli/WatchFile.Cli.csproj -nologo -t:GetTargetFramework -property:TargetFramework=net9.0 -getproperty:Version)
+          VERSION=$(dotnet msbuild src/WatchFile.Cli/WatchFile.Cli.csproj -nologo -getproperty:Version | tail -n 1)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Publish ${{ matrix.rid }}
