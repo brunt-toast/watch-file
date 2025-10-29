@@ -45,7 +45,11 @@ dotnet tool uninstall -g WatchFile.Cli; dotnet tool restore && dotnet cake --tar
 
 ## Completions
 
-For completions in Bash, source [script/watch-file-completion.bash](script/watch-file-completion.bash). 
+To enable completions, add this line to your .bashrc: 
+
+```bash
+ eval "$(watch-file completions --shell bash)"
+```
 
 ## License
 

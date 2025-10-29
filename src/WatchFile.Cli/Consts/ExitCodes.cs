@@ -5,4 +5,5 @@ internal static class ExitCodes
     public const int Success = 0;
     public const int ParseFailure = 1;
     public const int FailedToGetDirectory = 2;
+    public const int EmbeddedResourceStreamNotFound = 3;
 }
