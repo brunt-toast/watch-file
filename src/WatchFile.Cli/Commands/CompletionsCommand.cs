@@ -1,11 +1,5 @@
-﻿using Dev.JoshBrunton.WatchFile.Cli.Options.RootCommands.DefaultCommand;
-using System;
-using System.Collections.Generic;
-using System.CommandLine;
-using System.Linq;
+﻿using System.CommandLine;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Dev.JoshBrunton.WatchFile.Cli.Consts;
 using Dev.JoshBrunton.WatchFile.Cli.Enums;
 using Dev.JoshBrunton.WatchFile.Cli.Options.CompletionsCommand;

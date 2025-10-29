@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Dev.JoshBrunton.WatchFile.Cli.Enums;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Options.CompletionsCommand;

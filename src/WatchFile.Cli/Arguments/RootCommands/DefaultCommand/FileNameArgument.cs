@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.CommandLine;
+﻿using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Arguments.RootCommands.DefaultCommand;
 
