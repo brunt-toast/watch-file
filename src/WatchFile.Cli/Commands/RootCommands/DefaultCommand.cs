@@ -7,6 +7,7 @@ using DiffPlex;
 using DiffPlex.DiffBuilder;
 using DiffPlex.DiffBuilder.Model;
 using System.CommandLine;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -73,6 +74,7 @@ internal class DefaultCommand : RootCommand
         bool doClear = parseResult.GetValue(_clearFlag);
 
         string previousGreppedContent = string.Empty;
+        byte[] previousMd5Sum = [];
 
         while (true)
         {
@@ -86,6 +88,12 @@ internal class DefaultCommand : RootCommand
             {
                 Console.Error.WriteLine($"Could not access the file \"{filePath}\". We will try again in {delayMs}ms. Error: {Environment.NewLine}{ex}");
                 Thread.Sleep(delayMs);
+                continue;
+            }
+
+            byte[] md5Sum = MD5.HashData(fileContent.Select(x => (byte)x).ToArray());
+            if (md5Sum.SequenceEqual(previousMd5Sum))
+            {
                 continue;
             }
 
@@ -109,6 +117,7 @@ internal class DefaultCommand : RootCommand
             if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} +O({delayMs}ms) ===");
 
             previousGreppedContent = greppedOutput;
+            previousMd5Sum = md5Sum;
 
             Thread.Sleep(delayMs);
         }
