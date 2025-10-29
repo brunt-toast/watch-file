@@ -104,9 +104,9 @@ internal class DefaultCommand : RootCommand
             }
 
             DateTime now = DateTime.Now;
-            if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} ===");
+            if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} +O({delayMs}ms) ===");
             Console.WriteLine(tailedOutput);
-            if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} ===");
+            if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} +O({delayMs}ms) ===");
 
             previousGreppedContent = greppedOutput;
 
