@@ -91,6 +91,7 @@ internal class DefaultCommand : RootCommand
 
         while (true)
         {
+            DateTime iterationStartDateTime = DateTime.Now;
             string fileContent;
 
             try
@@ -125,9 +126,10 @@ internal class DefaultCommand : RootCommand
             }
 
             DateTime now = DateTime.Now;
-            if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} {(doWatch ? "" : $"+O({delayMs}ms) ")}===");
+            var errorMargin = (DateTime.Now - iterationStartDateTime).TotalMilliseconds + (doWatch ? 0 : delayMs);
+            if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} +-{errorMargin}ms ===");
             Console.WriteLine(tailedOutput);
-            if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} {(doWatch ? "" : $"+O({delayMs}ms) ")}===");
+            if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} +-{errorMargin}ms ===");
 
             previousGreppedContent = greppedOutput;
             previousMd5Sum = md5Sum;
