@@ -24,6 +24,7 @@ internal class DefaultCommand : RootCommand
     private readonly NoAnsiFlag _noAnsiFlag = new();
     private readonly NoFooterFlag _noFooterFlag = new();
     private readonly NoHeaderFlag _noHeaderFlag = new();
+    private readonly WatchFlag _watchFlag = new();
 
     private readonly GrepOption _grepOption = new();
     private readonly HeadOption _headOption = new();
@@ -38,6 +39,7 @@ internal class DefaultCommand : RootCommand
         Options.Add(_diffFlag);
         Options.Add(_noFooterFlag);
         Options.Add(_noHeaderFlag);
+        Options.Add(_watchFlag);
 
         Options.Add(_grepOption);
         Options.Add(_headOption);
@@ -72,6 +74,17 @@ internal class DefaultCommand : RootCommand
         bool doHeader = !parseResult.GetValue(_noHeaderFlag);
         bool doFooter = !parseResult.GetValue(_noFooterFlag);
         bool doClear = parseResult.GetValue(_clearFlag);
+        bool doWatch = parseResult.GetValue(_watchFlag);
+
+        string? fileDirectory = Path.GetDirectoryName(Path.GetFullPath(filePath));
+        if (fileDirectory is null)
+        {
+            Console.Error.WriteLine($"Couldn't determine the directory name from \"{filePath}\".");
+            return ExitCodes.FailedToGetDirectory;
+        }
+        using FileSystemWatcher fsw = new(fileDirectory);
+        fsw.Filter = Path.GetFileName(filePath);
+        fsw.NotifyFilter = NotifyFilters.LastWrite;
 
         string previousGreppedContent = string.Empty;
         byte[] previousMd5Sum = [];
@@ -112,14 +125,21 @@ internal class DefaultCommand : RootCommand
             }
 
             DateTime now = DateTime.Now;
-            if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} +O({delayMs}ms) ===");
+            if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} {(doWatch ? "" : $"+O({delayMs}ms) ")}===");
             Console.WriteLine(tailedOutput);
-            if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} +O({delayMs}ms) ===");
+            if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} {(doWatch ? "" : $"+O({delayMs}ms) ")}===");
 
             previousGreppedContent = greppedOutput;
             previousMd5Sum = md5Sum;
 
-            Thread.Sleep(delayMs);
+            if (doWatch)
+            {
+                fsw.WaitForChanged(WatcherChangeTypes.Changed);
+            }
+            else
+            {
+                Thread.Sleep(delayMs);
+            }
         }
     }
 
