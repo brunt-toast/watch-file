@@ -12,10 +12,12 @@
 
   <ItemGroup>
     <None Remove="Resources\watch-file-completion.bash" />
+    <None Remove="Resources\watch-file-completion.zsh" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="Resources\watch-file-completion.bash" />
+    <EmbeddedResource Include="Resources\watch-file-completion.zsh" />
   </ItemGroup>
 
   <ItemGroup>

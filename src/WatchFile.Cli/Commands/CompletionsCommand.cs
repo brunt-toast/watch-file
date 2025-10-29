@@ -23,6 +23,7 @@ internal class CompletionsCommand : Command
         string streamName = shell switch
         {
             Shell.Bash => "Dev.JoshBrunton.WatchFile.Cli.Resources.watch-file-completion.bash",
+            Shell.Zsh => "Dev.JoshBrunton.WatchFile.Cli.Resources.watch-file-completion.zsh",
             _ => ""
         };
 
@@ -35,7 +36,7 @@ internal class CompletionsCommand : Command
 
         using StreamReader reader = new(stream);
         string content = reader.ReadToEnd();
-        Console.WriteLine(content);
+        Console.WriteLine(content.Replace("\r\n", "\n"));
 
         return ExitCodes.Success;
     }
