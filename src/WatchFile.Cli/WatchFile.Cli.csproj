@@ -10,6 +10,21 @@
     <PackageOutputPath>./bin/nupkg</PackageOutputPath>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <PackageId>Dev.JoshBrunton.WatchFile.Cli</PackageId>
+    <PackageVersion>$(Version)</PackageVersion>
+    <Authors>Josh Brunton</Authors>
+    <Description>Watch a file for changes (not growth)</Description>
+    <Copyright>Josh Brunton 2025</Copyright>
+    <PackageProjectUrl>https://github.com/brunt-toast/watch-file</PackageProjectUrl>
+    <PackageIcon></PackageIcon>
+    <RepositoryUrl>https://github.com/brunt-toast/watch-file.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>terminal cli tool</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
   <ItemGroup>
     <None Remove="Resources\watch-file-completion.bash" />
     <None Remove="Resources\watch-file-completion.zsh" />
@@ -24,5 +39,4 @@
     <PackageReference Include="DiffPlex" Version="1.9.0" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-rc.1.25451.107" />
   </ItemGroup>
-
 </Project>
