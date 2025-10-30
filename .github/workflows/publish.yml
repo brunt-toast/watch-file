@@ -52,9 +52,23 @@ jobs:
           -p:PublishTrimmed=false
           -p:IncludeNativeLibrariesForSelfExtract=true
           -o "publish/${{ matrix.rid }}"
-          
-      - name: Upload artifact
+
+      - name: Upload published artifact
         uses: actions/upload-artifact@v4
         with:
           name: WatchFile.Cli-${{ steps.get_version.outputs.version }}-${{ matrix.rid }}
           path: publish/${{ matrix.rid }}/*
+
+      - name: Pack NuGet package
+        run: >
+          dotnet pack src/WatchFile.Cli/WatchFile.Cli.csproj
+          -c Release
+          -p:PackageVersion=${{ steps.get_version.outputs.version }}
+          -o ./artifacts/nuget
+
+      - name: Upload NuGet package to artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: WatchFile.Cli-NuGet-${{ steps.get_version.outputs.version }}
+          path: artifacts/nuget/*.nupkg
+
