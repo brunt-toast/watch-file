@@ -1,3 +1,5 @@
-﻿using Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
+﻿using Dev.JoshBrunton.WatchFile.Cli.Commands;
+using Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
 
-return new DefaultCommand().Execute(args);
+var rootCommand = new DefaultCommand { new CompletionsCommand() };
+return rootCommand.Execute(args);

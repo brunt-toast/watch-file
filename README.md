@@ -43,6 +43,14 @@ As a one-liner:
 dotnet tool uninstall -g WatchFile.Cli; dotnet tool restore && dotnet cake --target Pack && dotnet tool install -g --add-source ./src/WatchFile.Cli/bin/nupkg WatchFile.Cli;
 ```
 
+## Completions
+
+To enable completions, add this line to your shell's profile:
+
+```bash
+eval "$(watch-file completions --shell $(basename "$SHELL"))"
+```
+
 ## License
 
 The MIT License (MIT)
