@@ -2,7 +2,7 @@
     <PropertyGroup>
         <CsprojName>$([System.IO.Path]::GetFileNameWithoutExtension($(MSBuildProjectFile)))</CsprojName>
         <RootNamespace>Dev.JoshBrunton.$(CsprojName)</RootNamespace>
-        <Version>0.2.0</Version>
+        <Version>0.3.0</Version>
 
         <WarningsAsErrors>CA2017</WarningsAsErrors>
     </PropertyGroup>
