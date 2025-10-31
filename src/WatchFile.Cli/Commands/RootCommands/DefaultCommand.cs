@@ -10,7 +10,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dev.JoshBrunton.WatchFile.Cli.Extensions.DiffPlex.Builder.Model;
-using Dev.JoshBrunton.WatchFile.Cli.Flags.Global;
 using Dev.JoshBrunton.WatchFile.Cli.Response;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
