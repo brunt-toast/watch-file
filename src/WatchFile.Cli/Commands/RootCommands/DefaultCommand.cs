@@ -10,6 +10,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 using Dev.JoshBrunton.WatchFile.Cli.Extensions.DiffPlex.Builder.Model;
+using Dev.JoshBrunton.WatchFile.Cli.Flags.Global;
 using Dev.JoshBrunton.WatchFile.Cli.Response;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
@@ -19,7 +20,7 @@ internal class DefaultCommand : RootCommand
     private const string ConstDescription = """
                                             Observe a file for changes (rather than growth).
 
-                                            This command, and all of its subcommands, support the auto-response feature. The contents of the file ~/.config/watch-file/watch-file.rsp (or ~/.config/watch-file/watch-file.<subcommand>.rsp for subcommands) will automatically be appended to the end of any command invoked.
+                                            This command, and all of its subcommands, support the auto-response feature. The contents of the file ~/.config/watch-file/watch-file.rsp (or ~/.config/watch-file/watch-file.<subcommand>.rsp for subcommands) will automatically be appended to the end of any command invoked. To prevent this, use the flag --no-autorsp anywhere in the command.
                                             """;
 
     private readonly AutoRspHelper<DefaultCommand> _autoRspHelper;

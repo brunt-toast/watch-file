@@ -24,6 +24,11 @@ internal class AutoRspHelper<T> where T : Command
 
     public void MutateArgs(ref string[] args)
     {
+        if (args.Any(x => x == "--no-autorsp"))
+        {
+            return;
+        }
+
         string autoRspFilePath = GetAutoRspPath(args);
         if (!File.Exists(autoRspFilePath))
         {
