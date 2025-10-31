@@ -10,6 +10,7 @@ using System.CommandLine;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dev.JoshBrunton.WatchFile.Cli.Response;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
 
@@ -17,6 +18,7 @@ internal class DefaultCommand : RootCommand
 {
     private const string ConstDescription = "Observe a file for changes (rather than growth).";
 
+    private readonly AutoRspHelper<DefaultCommand> _autoRspHelper;
     private readonly InlineDiffBuilder _diffBuilder = new(new Differ());
 
     private readonly ClearFlag _clearFlag = new();
@@ -35,6 +37,8 @@ internal class DefaultCommand : RootCommand
 
     public DefaultCommand() : base(ConstDescription.WrapLongLines())
     {
+        _autoRspHelper = new AutoRspHelper<DefaultCommand>(this);
+
         Options.Add(_clearFlag);
         Options.Add(_diffFlag);
         Options.Add(_noFooterFlag);
@@ -53,6 +57,7 @@ internal class DefaultCommand : RootCommand
 
     public int Execute(string[] args)
     {
+        _autoRspHelper.MutateArgs(ref args);
         return Parse(args).Invoke();
     }
 
