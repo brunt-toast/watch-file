@@ -1,12 +1,5 @@
 ﻿using Dev.JoshBrunton.WatchFile.Cli.Consts;
-using Dev.JoshBrunton.WatchFile.Cli.Diff;
 using DiffPlex.DiffBuilder.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Extensions.DiffPlex.Builder.Model;
 
@@ -25,7 +18,7 @@ internal static class DiffPieceExtensions
         return source;
     }
 
-    public static IEnumerable<DiffPiece> WithLineNumbers(IEnumerable<DiffPiece> source)
+    public static IEnumerable<DiffPiece> WithLineNumbers(this IEnumerable<DiffPiece> source)
     {
         int oldLineNum = 1;
         int newLineNum = 1;

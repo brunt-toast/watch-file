@@ -92,17 +92,17 @@ internal class DefaultCommand : RootCommand
         fsw.Filter = Path.GetFileName(filePath);
         fsw.NotifyFilter = NotifyFilters.LastWrite;
 
-        string previousGreppedContent = string.Empty;
+        List<string> previousGreppedContent = [];
         byte[] previousMd5Sum = [];
 
         while (true)
         {
             DateTime iterationStartDateTime = DateTime.Now;
-            string fileContent;
+            string[] fileContent;
 
             try
             {
-                fileContent = File.ReadAllText(filePath);
+                fileContent = File.ReadAllLines(filePath);
             }
             catch (Exception ex)
             {
@@ -111,20 +111,20 @@ internal class DefaultCommand : RootCommand
                 continue;
             }
 
-            byte[] md5Sum = MD5.HashData(fileContent.Select(x => (byte)x).ToArray());
+            byte[] md5Sum = MD5.HashData(fileContent.SelectMany(x => x.Select(y => (byte)y)).ToArray());
             if (md5Sum.SequenceEqual(previousMd5Sum))
             {
                 continue;
             }
 
-            string greppedOutput = ApplyGrep(fileContent, filterRegex);
+            List<string> greppedOutput = ApplyGrep(fileContent, filterRegex).ToList();
 
             var diffedOutput = doDiff
                 ? ApplyDiff(previousGreppedContent, greppedOutput, doAnsi)
                 : greppedOutput;
 
-            string headedOutput = string.Join('\n', diffedOutput.Split('\n').Take(headLines));
-            string tailedOutput = string.Join('\n', headedOutput.Split('\n').TakeLast(tailLines));
+            IEnumerable<string> headedOutput = diffedOutput.Take(headLines);
+            IEnumerable<string> tailedOutput = headedOutput.TakeLast(tailLines);
 
             if (doClear)
             {
@@ -134,7 +134,10 @@ internal class DefaultCommand : RootCommand
             DateTime now = DateTime.Now;
             var errorMargin = (DateTime.Now - iterationStartDateTime).TotalMilliseconds + (doWatch ? 0 : delayMs);
             if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} +-{errorMargin}ms ===");
-            Console.WriteLine(tailedOutput);
+            foreach (string line in tailedOutput)
+            {
+                Console.WriteLine(line);
+            }
             if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} +-{errorMargin}ms ===");
 
             previousGreppedContent = greppedOutput;
@@ -151,28 +154,22 @@ internal class DefaultCommand : RootCommand
         }
     }
 
-    private static string ApplyGrep(string source, Regex pattern)
+    private static IEnumerable<string> ApplyGrep(string[] source, Regex pattern)
     {
-        return source.Split("\n")
-            .Where(line => pattern.IsMatch(line))
-            .Aggregate(string.Empty, (current, line) => current + line + '\n');
+        return source.Where(line => pattern.IsMatch(line));
     }
 
-    private string ApplyDiff(string oldContent, string newContent, bool doAnsi)
+    private IEnumerable<string> ApplyDiff(IEnumerable<string> oldContent, IEnumerable<string> newContent, bool doAnsi)
     {
-        StringBuilder sb = new();
-        IEnumerable<DiffPiece> lines = _diffBuilder.BuildDiffModel(oldContent, newContent).Lines;
+        IEnumerable<DiffPiece> lines = _diffBuilder.BuildDiffModel(
+            string.Join(Environment.NewLine, oldContent),
+            string.Join(Environment.NewLine, newContent)).Lines;
         if (doAnsi)
         {
             lines = lines.Select(x => x.WithAnsi());
         }
         lines = lines.WithLineNumbers();
 
-        foreach (var line in lines)
-        {
-            sb.AppendLine(line.Text);
-        }
-
-        return sb.ToString();
+        return lines.Select(x => x.Text);
     }
 }
