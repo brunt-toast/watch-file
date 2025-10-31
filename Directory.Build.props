@@ -5,6 +5,7 @@
         <Version>0.3.0</Version>
 
         <WarningsAsErrors>CA2017</WarningsAsErrors>
+        <Deterministic>true</Deterministic>
     </PropertyGroup>
 
 </Project>
