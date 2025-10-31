@@ -10,6 +10,7 @@ using System.CommandLine;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dev.JoshBrunton.WatchFile.Cli.Diff;
 using Dev.JoshBrunton.WatchFile.Cli.Response;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
@@ -160,32 +161,42 @@ internal class DefaultCommand : RootCommand
     private string ApplyDiff(string oldContent, string newContent, bool doAnsi)
     {
         StringBuilder sb = new();
-        foreach (var line in _diffBuilder.BuildDiffModel(oldContent, newContent).Lines)
+        List<DiffPiece>? lines1 = _diffBuilder.BuildDiffModel(oldContent, newContent).Lines;
+        List<DiffPieceWithLineNumbers> lines = DiffPieceWithLineNumbers.ParseList(lines1).ToList();
+        int longestLength = lines.Count.ToString().Length;
+
+        foreach (var line in lines)
         {
+            string formattedLine;
+
             switch (line.Type)
             {
                 case ChangeType.Deleted:
 
-                    sb.AppendLine(doAnsi
+                    formattedLine = (doAnsi
                         ? $"{Ansi.Red}- {line.Text}{Ansi.Reset}"
                         : $"- {line.Text}");
                     break;
                 case ChangeType.Inserted:
-                    sb.AppendLine(doAnsi
+                    formattedLine = (doAnsi
                         ? $"{Ansi.Green}+ {line.Text}{Ansi.Reset}"
                         : $"+ {line.Text}");
                     break;
                 case ChangeType.Modified:
-                    sb.AppendLine(doAnsi
+                    formattedLine = (doAnsi
                         ? $"{Ansi.Blue}~ {line.Text}{Ansi.Reset}"
                         : $"~ {line.Text}");
                     break;
                 case ChangeType.Unchanged:
                 case ChangeType.Imaginary:
                 default:
-                    sb.AppendLine("  " + line.Text);
+                    formattedLine = ("  " + line.Text);
                     break;
             }
+
+            sb.AppendLine($"{line.OldLineNumber.ToString().PadLeft(longestLength)} " +
+                          $"{line.NewLineNumber.ToString().PadLeft(longestLength, ' ')} " +
+                          $"{formattedLine}");
         }
 
         return sb.ToString();
