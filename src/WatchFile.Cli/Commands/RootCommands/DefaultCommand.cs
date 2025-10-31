@@ -161,42 +161,20 @@ internal class DefaultCommand : RootCommand
     private string ApplyDiff(string oldContent, string newContent, bool doAnsi)
     {
         StringBuilder sb = new();
-        List<DiffPiece>? lines1 = _diffBuilder.BuildDiffModel(oldContent, newContent).Lines;
-        List<DiffPieceWithLineNumbers> lines = DiffPieceWithLineNumbers.ParseList(lines1).ToList();
-        int longestLength = lines.Count.ToString().Length;
-
-        foreach (var line in lines)
+        IEnumerable<DiffPiece> lines = _diffBuilder.BuildDiffModel(oldContent, newContent).Lines;
+        if (doAnsi)
         {
-            string formattedLine;
+            lines = lines.Select(x => new DiffPieceWithAnsi(x));
+        }
 
-            switch (line.Type)
-            {
-                case ChangeType.Deleted:
+        List<DiffPieceWithLineNumbers> numberedLines = DiffPieceWithLineNumbers.ParseList(lines).ToList();
+        int longestLength = numberedLines.Count.ToString().Length;
 
-                    formattedLine = (doAnsi
-                        ? $"{Ansi.Red}- {line.Text}{Ansi.Reset}"
-                        : $"- {line.Text}");
-                    break;
-                case ChangeType.Inserted:
-                    formattedLine = (doAnsi
-                        ? $"{Ansi.Green}+ {line.Text}{Ansi.Reset}"
-                        : $"+ {line.Text}");
-                    break;
-                case ChangeType.Modified:
-                    formattedLine = (doAnsi
-                        ? $"{Ansi.Blue}~ {line.Text}{Ansi.Reset}"
-                        : $"~ {line.Text}");
-                    break;
-                case ChangeType.Unchanged:
-                case ChangeType.Imaginary:
-                default:
-                    formattedLine = ("  " + line.Text);
-                    break;
-            }
-
+        foreach (var line in numberedLines)
+        {
             sb.AppendLine($"{line.OldLineNumber.ToString().PadLeft(longestLength)} " +
                           $"{line.NewLineNumber.ToString().PadLeft(longestLength, ' ')} " +
-                          $"{formattedLine}");
+                          $"{line.Text}");
         }
 
         return sb.ToString();
