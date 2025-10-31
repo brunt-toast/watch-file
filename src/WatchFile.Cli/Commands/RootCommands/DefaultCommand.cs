@@ -106,7 +106,11 @@ internal class DefaultCommand : RootCommand
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Could not access the file \"{filePath}\". We will try again in {delayMs}ms. Error: {Environment.NewLine}{ex}");
+                Console.Error.WriteLine($"Could not access the file \"{filePath}\".");
+                Console.Error.WriteLine(doWatch 
+                    ? "We will try again next time the filesystem reports a change." 
+                    : $"We will try again in {delayMs}ms.");
+                Console.Error.WriteLine($"Error: {Environment.NewLine}{ex}");
                 Thread.Sleep(delayMs);
                 continue;
             }
