@@ -1,6 +1,5 @@
 ﻿using Dev.JoshBrunton.WatchFile.Cli.Arguments.RootCommands.DefaultCommand;
 using Dev.JoshBrunton.WatchFile.Cli.Consts;
-using Dev.JoshBrunton.WatchFile.Cli.Extensions.System;
 using Dev.JoshBrunton.WatchFile.Cli.Flags.RootCommands.DefaultCommand;
 using Dev.JoshBrunton.WatchFile.Cli.Options.RootCommands.DefaultCommand;
 using DiffPlex;
@@ -10,13 +9,21 @@ using System.CommandLine;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
+using Dev.JoshBrunton.WatchFile.Cli.Extensions.DiffPlex.Builder.Model;
+using Dev.JoshBrunton.WatchFile.Cli.Flags.Global;
+using Dev.JoshBrunton.WatchFile.Cli.Response;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
 
 internal class DefaultCommand : RootCommand
 {
-    private const string ConstDescription = "Observe a file for changes (rather than growth).";
+    private const string ConstDescription = """
+                                            Observe a file for changes (rather than growth).
 
+                                            This command, and all of its subcommands, support the auto-response feature. The contents of the file ~/.config/watch-file/watch-file.rsp (or ~/.config/watch-file/watch-file.<subcommand>.rsp for subcommands) will automatically be appended to the end of any command invoked. To prevent this, use the flag --no-autorsp anywhere in the command.
+                                            """;
+
+    private readonly AutoRspHelper<DefaultCommand> _autoRspHelper;
     private readonly InlineDiffBuilder _diffBuilder = new(new Differ());
 
     private readonly ClearFlag _clearFlag = new();
@@ -33,8 +40,10 @@ internal class DefaultCommand : RootCommand
 
     private readonly FileNameArgument _fileNameArgument = new();
 
-    public DefaultCommand() : base(ConstDescription.WrapLongLines())
+    public DefaultCommand() : base(ConstDescription)
     {
+        _autoRspHelper = new AutoRspHelper<DefaultCommand>(this);
+
         Options.Add(_clearFlag);
         Options.Add(_diffFlag);
         Options.Add(_noFooterFlag);
@@ -53,6 +62,7 @@ internal class DefaultCommand : RootCommand
 
     public int Execute(string[] args)
     {
+        _autoRspHelper.MutateArgs(ref args);
         return Parse(args).Invoke();
     }
 
@@ -86,39 +96,43 @@ internal class DefaultCommand : RootCommand
         fsw.Filter = Path.GetFileName(filePath);
         fsw.NotifyFilter = NotifyFilters.LastWrite;
 
-        string previousGreppedContent = string.Empty;
+        List<string> previousGreppedContent = [];
         byte[] previousMd5Sum = [];
 
         while (true)
         {
             DateTime iterationStartDateTime = DateTime.Now;
-            string fileContent;
+            string[] fileContent;
 
             try
             {
-                fileContent = File.ReadAllText(filePath);
+                fileContent = File.ReadAllLines(filePath);
             }
             catch (Exception ex)
             {
-                Console.Error.WriteLine($"Could not access the file \"{filePath}\". We will try again in {delayMs}ms. Error: {Environment.NewLine}{ex}");
+                Console.Error.WriteLine($"Could not access the file \"{filePath}\".");
+                Console.Error.WriteLine(doWatch 
+                    ? "We will try again next time the filesystem reports a change." 
+                    : $"We will try again in {delayMs}ms.");
+                Console.Error.WriteLine($"Error: {Environment.NewLine}{ex}");
                 Thread.Sleep(delayMs);
                 continue;
             }
 
-            byte[] md5Sum = MD5.HashData(fileContent.Select(x => (byte)x).ToArray());
+            byte[] md5Sum = MD5.HashData(fileContent.SelectMany(x => x.Select(y => (byte)y)).ToArray());
             if (md5Sum.SequenceEqual(previousMd5Sum))
             {
                 continue;
             }
 
-            string greppedOutput = ApplyGrep(fileContent, filterRegex);
+            List<string> greppedOutput = ApplyGrep(fileContent, filterRegex).ToList();
 
             var diffedOutput = doDiff
                 ? ApplyDiff(previousGreppedContent, greppedOutput, doAnsi)
                 : greppedOutput;
 
-            string headedOutput = string.Join('\n', diffedOutput.Split('\n').Take(headLines));
-            string tailedOutput = string.Join('\n', headedOutput.Split('\n').TakeLast(tailLines));
+            IEnumerable<string> headedOutput = diffedOutput.Take(headLines);
+            IEnumerable<string> tailedOutput = headedOutput.TakeLast(tailLines);
 
             if (doClear)
             {
@@ -128,7 +142,10 @@ internal class DefaultCommand : RootCommand
             DateTime now = DateTime.Now;
             var errorMargin = (DateTime.Now - iterationStartDateTime).TotalMilliseconds + (doWatch ? 0 : delayMs);
             if (doHeader) Console.WriteLine($"=== START \"{filePath}\" at {now:O} +-{errorMargin}ms ===");
-            Console.WriteLine(tailedOutput);
+            foreach (string line in tailedOutput)
+            {
+                Console.WriteLine(line);
+            }
             if (doFooter) Console.WriteLine($"=== END   \"{filePath}\" at {now:O} +-{errorMargin}ms ===");
 
             previousGreppedContent = greppedOutput;
@@ -145,44 +162,22 @@ internal class DefaultCommand : RootCommand
         }
     }
 
-    private static string ApplyGrep(string source, Regex pattern)
+    private static IEnumerable<string> ApplyGrep(string[] source, Regex pattern)
     {
-        return source.Split("\n")
-            .Where(line => pattern.IsMatch(line))
-            .Aggregate(string.Empty, (current, line) => current + line + '\n');
+        return source.Where(line => pattern.IsMatch(line));
     }
 
-    private string ApplyDiff(string oldContent, string newContent, bool doAnsi)
+    private IEnumerable<string> ApplyDiff(IEnumerable<string> oldContent, IEnumerable<string> newContent, bool doAnsi)
     {
-        StringBuilder sb = new();
-        foreach (var line in _diffBuilder.BuildDiffModel(oldContent, newContent).Lines)
+        IEnumerable<DiffPiece> lines = _diffBuilder.BuildDiffModel(
+            string.Join(Environment.NewLine, oldContent),
+            string.Join(Environment.NewLine, newContent)).Lines;
+        if (doAnsi)
         {
-            switch (line.Type)
-            {
-                case ChangeType.Deleted:
-
-                    sb.AppendLine(doAnsi
-                        ? $"{Ansi.Red}- {line.Text}{Ansi.Reset}"
-                        : $"- {line.Text}");
-                    break;
-                case ChangeType.Inserted:
-                    sb.AppendLine(doAnsi
-                        ? $"{Ansi.Green}+ {line.Text}{Ansi.Reset}"
-                        : $"+ {line.Text}");
-                    break;
-                case ChangeType.Modified:
-                    sb.AppendLine(doAnsi
-                        ? $"{Ansi.Blue}~ {line.Text}{Ansi.Reset}"
-                        : $"~ {line.Text}");
-                    break;
-                case ChangeType.Unchanged:
-                case ChangeType.Imaginary:
-                default:
-                    sb.AppendLine("  " + line.Text);
-                    break;
-            }
+            lines = lines.Select(x => x.WithAnsi());
         }
+        lines = lines.WithLineNumbers();
 
-        return sb.ToString();
+        return lines.Select(x => x.Text);
     }
 }

@@ -15,7 +15,13 @@ This tool acknowledges that change and growth are different.  Unlike `tail -f` a
 
 ## Installation
 
-This tool isn't currently available on any package managers. 
+### As a .NET tool
+
+```bash
+dotnet tool install -g Dev.JoshBrunton.WatchFile.Cli
+```
+
+### From pre-compiled binaries 
 
 If you're running a compatible operating system (Windows x64 or x86, Linux x64), you can download any of the pre-compiled [releases](https://github.com/brunt-toast/watch-file/releases). Download the file relevant to your OS and architecture, rename it to whatever you like (usually `watch-file[.exe]`), and drop it in a directory with the following guide: 
 
@@ -28,7 +34,7 @@ If you're running a compatible operating system (Windows x64 or x86, Linux x64),
 | Linux   | x64 | Single | `~/.local/bin` |
 | Linux   | x64 | Multi  | `/usr/local/bin` |
 
-## Compile From Source
+### Compile From Source
 
 As a pre-requisite, you'll need the .NET 9 SDK. The shortest robust way to compile and install the tool is: 
 ```bash
@@ -42,6 +48,16 @@ As a one-liner:
 ```bash
 dotnet tool uninstall -g WatchFile.Cli; dotnet tool restore && dotnet cake --target Pack && dotnet tool install -g --add-source ./src/WatchFile.Cli/bin/nupkg WatchFile.Cli;
 ```
+
+## Configuration
+
+Configuration is entirely optional. It's designed as a convenience in case a command's default are not convenient for your use case. 
+
+Configuration is managed on a per-command level. The global command is configured by the file at `~/.config/watch-file/watch-file.rsp` (or `%USERPROFILE%\.config\...` on Windows), and sub-commands are configured by `.../watch-file.<subcommand>.rsp`. 
+
+The configuration format is an auto-response file. This means that the content of the file is treated as if it was explicitly specified on the end of the command. Parsing is done with the .NET System.CommandLine parser, so the result may differ slightly from the parsing of explicit args, which is handled by your shell. 
+
+To disregard auto-response configuration, use the hidden flag `--no-autorsp` on any command. 
 
 ## Completions
 
