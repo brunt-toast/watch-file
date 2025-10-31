@@ -11,18 +11,20 @@ internal class AutoRspHelper<T> where T : Command
         _command = command;
     }
 
-    private string GetAutoRspPath()
+    private string GetAutoRspPath(string[] args)
     {
-        string fileName = typeof(T).IsAssignableTo(typeof(RootCommand)) 
+        Command realCommand = _command.Parse(args).CommandResult.Command;
+
+        string fileName = realCommand.GetType().IsAssignableTo(typeof(RootCommand)) 
             ? "watch-file.rsp" 
-            : $"watch-file.{_command.Name}.rsp";
+            : $"watch-file.{realCommand.Name}.rsp";
 
         return Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".config", "watch-file", fileName);
     }
 
     public void MutateArgs(ref string[] args)
     {
-        string autoRspFilePath = GetAutoRspPath();
+        string autoRspFilePath = GetAutoRspPath(args);
         if (!File.Exists(autoRspFilePath))
         {
             return;
@@ -39,6 +41,6 @@ internal class AutoRspHelper<T> where T : Command
             return;
         }
 
-        args = [.. System.CommandLine.Parsing.CommandLineParser.SplitCommandLine(content), .. args];
+        args = [.. args, .. System.CommandLine.Parsing.CommandLineParser.SplitCommandLine(content)];
     }
 }
