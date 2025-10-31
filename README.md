@@ -49,6 +49,16 @@ As a one-liner:
 dotnet tool uninstall -g WatchFile.Cli; dotnet tool restore && dotnet cake --target Pack && dotnet tool install -g --add-source ./src/WatchFile.Cli/bin/nupkg WatchFile.Cli;
 ```
 
+## Configuration
+
+Configuration is entirely optional. It's designed as a convenience in case a command's default are not convenient for your use case. 
+
+Configuration is managed on a per-command level. The global command is configured by the file at `~/.config/watch-file/watch-file.rsp` (or `%USERPROFILE%\.config\...` on Windows), and sub-commands are configured by `.../watch-file.<subcommand>.rsp`. 
+
+The configuration format is an auto-response file. This means that the content of the file is treated as if it was explicitly specified on the end of the command. Parsing is done with the .NET System.CommandLine parser, so the result may differ slightly from the parsing of explicit args, which is handled by your shell. 
+
+To disregard auto-response configuration, use the hidden flag `--no-autorsp` on any command. 
+
 ## Completions
 
 To enable completions, add this line to your shell's profile:
