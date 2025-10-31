@@ -10,7 +10,7 @@ using System.CommandLine;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
-using Dev.JoshBrunton.WatchFile.Cli.Diff;
+using Dev.JoshBrunton.WatchFile.Cli.Extensions.DiffPlex.Builder.Model;
 using Dev.JoshBrunton.WatchFile.Cli.Response;
 
 namespace Dev.JoshBrunton.WatchFile.Cli.Commands.RootCommands;
@@ -164,17 +164,13 @@ internal class DefaultCommand : RootCommand
         IEnumerable<DiffPiece> lines = _diffBuilder.BuildDiffModel(oldContent, newContent).Lines;
         if (doAnsi)
         {
-            lines = lines.Select(x => new DiffPieceWithAnsi(x));
+            lines = lines.Select(x => x.WithAnsi());
         }
+        lines = lines.WithLineNumbers();
 
-        List<DiffPieceWithLineNumbers> numberedLines = DiffPieceWithLineNumbers.ParseList(lines).ToList();
-        int longestLength = numberedLines.Count.ToString().Length;
-
-        foreach (var line in numberedLines)
+        foreach (var line in lines)
         {
-            sb.AppendLine($"{line.OldLineNumber.ToString().PadLeft(longestLength)} " +
-                          $"{line.NewLineNumber.ToString().PadLeft(longestLength, ' ')} " +
-                          $"{line.Text}");
+            sb.AppendLine(line.Text);
         }
 
         return sb.ToString();
