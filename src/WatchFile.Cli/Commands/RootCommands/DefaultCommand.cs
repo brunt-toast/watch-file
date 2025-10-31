@@ -1,6 +1,5 @@
 ﻿using Dev.JoshBrunton.WatchFile.Cli.Arguments.RootCommands.DefaultCommand;
 using Dev.JoshBrunton.WatchFile.Cli.Consts;
-using Dev.JoshBrunton.WatchFile.Cli.Extensions.System;
 using Dev.JoshBrunton.WatchFile.Cli.Flags.RootCommands.DefaultCommand;
 using Dev.JoshBrunton.WatchFile.Cli.Options.RootCommands.DefaultCommand;
 using DiffPlex;
@@ -40,7 +39,7 @@ internal class DefaultCommand : RootCommand
 
     private readonly FileNameArgument _fileNameArgument = new();
 
-    public DefaultCommand() : base(ConstDescription.WrapLongLines())
+    public DefaultCommand() : base(ConstDescription)
     {
         _autoRspHelper = new AutoRspHelper<DefaultCommand>(this);
 
